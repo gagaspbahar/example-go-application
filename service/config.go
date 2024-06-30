@@ -12,13 +12,14 @@ type ConfigService interface {
 	GetTrees(NumberOfTrees int) ([]model.Tree, error)
 }
 
+// Scanner interface to abstract scanner
 type Scanner interface {
 	Scan() bool
 	Text() string
 }
 
+// Constants for field and tree dimensions
 const (
-	// FieldWidthMin minimum field Width
 	FieldMin      = 1
 	FieldMax      = 50000
 	TreeHeightMin = 1
@@ -30,6 +31,7 @@ type FileConfigService struct {
 	Scanner
 }
 
+// GetFieldDimensions function to get field dimensions from input
 func (f *FileConfigService) GetFieldDimensions() (model.Field, error) {
 	if !f.Scanner.Scan() {
 		return model.Field{}, fmt.Errorf("failed to read field dimensions")
@@ -41,6 +43,7 @@ func (f *FileConfigService) GetFieldDimensions() (model.Field, error) {
 		return model.Field{}, fmt.Errorf("error reading field dimensions: %v", err)
 	}
 
+	// Validations
 	if field.Width < FieldMin {
 		return model.Field{}, fmt.Errorf("field Width is too low: %d", field.Width)
 	}
@@ -63,8 +66,10 @@ func (f *FileConfigService) GetFieldDimensions() (model.Field, error) {
 	return field, nil
 }
 
+// GetTrees function to get tree data from input
 func (f *FileConfigService) GetTrees(NumberOfTrees int) ([]model.Tree, error) {
 	var trees []model.Tree
+	// Read tree data, iterate through the number of trees
 	for i := 0; i < NumberOfTrees; i++ {
 		if !f.Scanner.Scan() {
 			return nil, fmt.Errorf("failed to read tree data")
@@ -75,6 +80,8 @@ func (f *FileConfigService) GetTrees(NumberOfTrees int) ([]model.Tree, error) {
 		if _, err := fmt.Sscanf(line, "%d %d %d", &tree.X, &tree.Y, &tree.Height); err != nil {
 			return nil, fmt.Errorf("error reading tree data: %v", err)
 		}
+
+		// Validations
 		if tree.Height > TreeHeightMax {
 			return nil, fmt.Errorf("tree height is too high: %d", tree.Height)
 		}
